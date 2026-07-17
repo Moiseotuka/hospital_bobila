@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build
+.next/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+pgdata/
+
+# Laravel
+backend/storage/framework/cache/data/*
+backend/storage/logs/*
+backend/bootstrap/cache/*
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Uploads
+backend/storage/app/public/photos/*
+backend/storage/app/public/logos/*
+backend/storage/app/public/bulletins/*
+!backend/storage/app/public/.gitkeep

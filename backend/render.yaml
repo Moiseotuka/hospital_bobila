@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: hopital-paie-backend
+    env: php
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan optimize
+      php artisan storage:link
+    startCommand: |
+      php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://hopital-paie-backend.onrender.com
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: hopital-paie-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: hopital-paie-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: hopital-paie-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: hopital-paie-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: hopital-paie-db
+          property: password
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: hopital-paie.vercel.app,localhost:3000
+      - key: SESSION_DRIVER
+        value: cookie
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://hopital-paie.vercel.app,http://localhost:3000
+
+databases:
+  - name: hopital-paie-db
+    databaseName: paie_hopital
+    plan: free
