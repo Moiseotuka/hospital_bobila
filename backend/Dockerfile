@@ -17,4 +17,5 @@ COPY . .
 RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views storage/framework/cache && \
     chmod -R 777 bootstrap/cache storage
 
-CMD php -v
+EXPOSE 8000
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
