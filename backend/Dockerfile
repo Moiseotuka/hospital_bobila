@@ -16,6 +16,6 @@ COPY . .
 RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views storage/framework/cache storage/logs && \
     chmod -R 777 bootstrap/cache storage
 
-EXPOSE 8000
-ENV PORT=8000
+EXPOSE 10000
+ENV PORT=10000
 CMD php -S 0.0.0.0:${PORT} -t public public/index.php
