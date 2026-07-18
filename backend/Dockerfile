@@ -9,10 +9,13 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 
 WORKDIR /app
 COPY composer.json ./
-ENV COMPOSER_MEMORY_LIMIT=-1
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist 2>&1
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist --no-audit 2>&1
 
 COPY .env.example.prod ./
 RUN cp .env.example.prod .env
 
-CMD echo "build finished"
+COPY . .
+RUN php artisan key:generate --force
+
+EXPOSE 8000
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
