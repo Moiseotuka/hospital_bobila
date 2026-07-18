@@ -16,16 +16,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-COPY composer.json ./
-RUN if [ -f composer.lock ]; then cp composer.lock .; fi && \
-    composer install --no-dev --optimize-autoloader --no-interaction
-
 COPY . .
 
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && php artisan storage:link || true
+RUN if [ -f composer.lock ]; then cp composer.lock .; fi && \
+    cp .env.example .env && \
+    composer install --no-dev --optimize-autoloader --no-interaction
 
 EXPOSE 8000
 
