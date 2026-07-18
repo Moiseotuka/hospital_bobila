@@ -22,7 +22,7 @@ class RolePermissionSeeder extends Seeder
 
         foreach ($modules as $module) {
             foreach ($actions as $action) {
-                Permission::create(['name' => "{$module}.{$action}", 'guard_name' => 'web']);
+                Permission::firstOrCreate(['name' => "{$module}.{$action}", 'guard_name' => 'web']);
             }
         }
 
@@ -44,7 +44,7 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($roles as $roleName => $permissions) {
-            $role = Role::create(['name' => $roleName, 'guard_name' => 'web']);
+            $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
             $role->givePermissionTo($permissions);
         }
     }
