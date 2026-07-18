@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\ServiceProvider;
+
 return [
     'name' => env('APP_NAME', 'Laravel'),
     'env' => env('APP_ENV', 'production'),
@@ -20,5 +22,11 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-    'providers' => [],
+    'providers' => ServiceProvider::defaultProviders()->merge([
+        Barryvdh\DomPDF\ServiceProvider::class,
+        Laravel\Sanctum\SanctumServiceProvider::class,
+        Laravel\Tinker\TinkerServiceProvider::class,
+        Spatie\Activitylog\ActivitylogServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
+    ])->toArray(),
 ];
