@@ -2,6 +2,7 @@
 /node_modules
 .env
 .env.*
+!.env.example.prod
 !env.example
 /storage/framework/cache/data/*
 /storage/logs/*
