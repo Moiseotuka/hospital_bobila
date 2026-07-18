@@ -32,6 +32,10 @@ Route::get('/health', function () {
             $dbError = $e->getMessage();
         }
 
+        $migrateLog = file_exists('/tmp/migrate.log') ? file_get_contents('/tmp/migrate.log') : null;
+        $seedLog = file_exists('/tmp/seed.log') ? file_get_contents('/tmp/seed.log') : null;
+        $phpLog = file_exists('/tmp/php-server.log') ? file_get_contents('/tmp/php-server.log') : null;
+
         return response()->json([
             'success' => true,
             'message' => 'API Hôpital Militaire Camp Kokolo - Opérationnelle',
@@ -40,6 +44,8 @@ Route::get('/health', function () {
                 'db_connected' => $dbOk,
                 'user_count' => $userCount,
                 'db_error' => $dbOk ? null : ($dbError ?? null),
+                'migrate_log' => $migrateLog,
+                'seed_log' => $seedLog,
             ],
         ]);
     } catch (\Throwable $e) {
