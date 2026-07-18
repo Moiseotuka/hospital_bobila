@@ -25,7 +25,7 @@ class HospitalSettingSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            HospitalSetting::create($setting);
+            HospitalSetting::updateOrCreate(['key' => $setting['key']], $setting);
         }
     }
 }
