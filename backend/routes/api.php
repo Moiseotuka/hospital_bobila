@@ -21,11 +21,34 @@ use Illuminate\Support\Facades\Route;
 
 // Health check
 Route::get('/health', function () {
-    return response()->json([
-        'success' => true,
-        'message' => 'API Hôpital Militaire Camp Kokolo - Opérationnelle',
-        'timestamp' => now()->toIso8601String(),
-    ]);
+    try {
+        $dbOk = false;
+        $userCount = 0;
+        try {
+            $userCount = \App\Models\User::count();
+            $dbOk = true;
+        } catch (\Throwable $e) {
+            $dbOk = false;
+            $dbError = $e->getMessage();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'API Hôpital Militaire Camp Kokolo - Opérationnelle',
+            'timestamp' => now()->toIso8601String(),
+            'debug' => [
+                'db_connected' => $dbOk,
+                'user_count' => $userCount,
+                'db_error' => $dbOk ? null : ($dbError ?? null),
+            ],
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'error' => get_class($e) . ': ' . $e->getMessage(),
+            'file' => $e->getFile() . ':' . $e->getLine(),
+        ], 500);
+    }
 });
 
 // Public routes
