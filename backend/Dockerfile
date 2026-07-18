@@ -9,6 +9,13 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 
 WORKDIR /app
 COPY composer.json ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist 2>&1 | tail -20
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist 2>&1
 
-CMD echo "composer install finished"
+COPY .env.example.prod ./
+RUN cp .env.example.prod .env
+
+COPY . .
+RUN chmod -R 777 storage bootstrap/cache
+
+EXPOSE 8000
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
