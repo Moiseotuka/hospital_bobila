@@ -1,7 +1,7 @@
 FROM php:8.4-cli-alpine
 
-RUN apk add --no-cache postgresql-dev unzip libxml2-dev freetype-dev libjpeg-turbo-dev libpng-dev && \
-    docker-php-ext-install -j4 pdo_pgsql gd zip intl exif pcntl bcmath
+RUN apk add --no-cache postgresql-dev unzip libxml2-dev freetype-dev libjpeg-turbo-dev libpng-dev libzip-dev icu-dev && \
+    docker-php-ext-install -j4 pdo_pgsql gd zip intl
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
