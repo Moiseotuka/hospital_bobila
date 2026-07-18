@@ -32,10 +32,6 @@ Route::get('/health', function () {
             $dbError = $e->getMessage();
         }
 
-        $migrateLog = file_exists('/tmp/migrate.log') ? file_get_contents('/tmp/migrate.log') : null;
-        $seedLog = file_exists('/tmp/seed.log') ? file_get_contents('/tmp/seed.log') : null;
-        $phpLog = file_exists('/tmp/php-server.log') ? file_get_contents('/tmp/php-server.log') : null;
-
         return response()->json([
             'success' => true,
             'message' => 'API Hôpital Militaire Camp Kokolo - Opérationnelle',
@@ -44,10 +40,28 @@ Route::get('/health', function () {
                 'db_connected' => $dbOk,
                 'user_count' => $userCount,
                 'db_error' => $dbOk ? null : ($dbError ?? null),
-                'migrate_log' => $migrateLog,
-                'seed_log' => $seedLog,
             ],
         ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'error' => get_class($e) . ': ' . $e->getMessage(),
+            'file' => $e->getFile() . ':' . $e->getLine(),
+        ], 500);
+    }
+});
+
+// Setup endpoint (one-time use)
+Route::post('/setup', function () {
+    try {
+        $output = [];
+        $exitCode = \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $output['migrate'] = ['exit' => $exitCode, 'output' => \Illuminate\Support\Facades\Artisan::output()];
+
+        $exitCode = \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        $output['seed'] = ['exit' => $exitCode, 'output' => \Illuminate\Support\Facades\Artisan::output()];
+
+        return response()->json(['success' => true, 'output' => $output]);
     } catch (\Throwable $e) {
         return response()->json([
             'success' => false,
