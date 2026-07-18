@@ -10,8 +10,7 @@
                     "spatie/laravel-permission":  "^6.0",
                     "spatie/laravel-activitylog":  "^4.9",
                     "barryvdh/laravel-dompdf":  "^3.0",
-                    "simplesoftwareio/simple-qrcode":  "^4.2",
-                    "laravel/horizon":  "^5.29"
+                    "simplesoftwareio/simple-qrcode":  "^4.2"
                 },
     "autoload":  {
                      "psr-4":  {
