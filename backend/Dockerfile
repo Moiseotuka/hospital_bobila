@@ -18,4 +18,5 @@ RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views 
 
 EXPOSE 10000
 ENV PORT=10000
+ENV APP_DEBUG=false
 CMD php -S 0.0.0.0:${PORT:-10000} -t public public/index.php

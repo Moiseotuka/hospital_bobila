@@ -51,23 +51,6 @@ Route::get('/health', function () {
     }
 });
 
-// Setup endpoint (one-time use)
-Route::post('/setup', function () {
-    try {
-        $output = [];
-        $exitCode = \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true, '--seed' => true]);
-        $output['migrate'] = ['exit' => $exitCode, 'output' => \Illuminate\Support\Facades\Artisan::output()];
-
-        return response()->json(['success' => true, 'output' => $output]);
-    } catch (\Throwable $e) {
-        return response()->json([
-            'success' => false,
-            'error' => get_class($e) . ': ' . $e->getMessage(),
-            'file' => $e->getFile() . ':' . $e->getLine(),
-        ], 500);
-    }
-});
-
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
