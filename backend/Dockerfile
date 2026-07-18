@@ -1,6 +1,6 @@
-FROM php:8.4-cli
+FROM php:8.4-cli-bookworm
 RUN docker-php-ext-install pdo_pgsql
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 RUN cp .env.example.prod .env && composer install --no-dev --optimize-autoloader --no-interaction
