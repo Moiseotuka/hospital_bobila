@@ -1,17 +1,3 @@
-FROM php:8.4-cli
-
-RUN docker-php-ext-install pdo_pgsql
-
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-WORKDIR /app
-
-COPY composer.json ./
-COPY .env.example .env
-RUN composer install --no-interaction --no-scripts
-
-COPY . .
-
-EXPOSE 8000
-
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+FROM alpine:3.19
+RUN echo "Build works" > /tmp/test.txt
+CMD cat /tmp/test.txt && sleep infinity
