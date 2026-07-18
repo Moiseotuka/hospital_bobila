@@ -52,3 +52,31 @@ export function useUpdateProfile() {
     },
   });
 }
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: ({ email }: { email: string }) =>
+      authService.forgotPassword(email),
+  });
+}
+
+export function useResetPassword() {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: ({
+      email,
+      token,
+      password,
+      passwordConfirmation,
+    }: {
+      email: string;
+      token: string;
+      password: string;
+      passwordConfirmation: string;
+    }) => authService.resetPassword(email, token, password, passwordConfirmation),
+    onSuccess: () => {
+      router.push("/login");
+    },
+  });
+}

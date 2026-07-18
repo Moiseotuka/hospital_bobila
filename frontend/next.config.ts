@@ -9,18 +9,6 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/",
-        destination: "/login",
-        permanent: false,
-        has: [
-          {
-            type: "cookie",
-            key: "auth_token",
-            value: undefined,
-          },
-        ],
-      },
-      {
-        source: "/",
         destination: "/dashboard",
         permanent: false,
         has: [
@@ -29,6 +17,11 @@ const nextConfig: NextConfig = {
             key: "auth_token",
           },
         ],
+      },
+      {
+        source: "/",
+        destination: "/login",
+        permanent: false,
       },
     ];
   },

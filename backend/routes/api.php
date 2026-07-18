@@ -30,6 +30,8 @@ Route::get('/health', function () {
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset']);
 
 // Protected routes
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {

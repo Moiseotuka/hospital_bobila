@@ -58,8 +58,13 @@ class AdminUserSeeder extends Seeder
             $spatieRole = $userData['spatie_role'];
             unset($userData['spatie_role']);
 
-            $user = User::create($userData);
-            $user->assignRole($spatieRole);
+            $user = User::updateOrCreate(
+                ['email' => $userData['email']],
+                $userData
+            );
+            if (!$user->hasRole($spatieRole)) {
+                $user->assignRole($spatieRole);
+            }
         }
     }
 }

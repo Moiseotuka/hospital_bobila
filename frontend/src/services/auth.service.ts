@@ -28,4 +28,19 @@ export const authService = {
     const response = await api.put("/profile", data);
     return response.data;
   },
+
+  async forgotPassword(email: string) {
+    const response = await api.post("/forgot-password", { email });
+    return response.data;
+  },
+
+  async resetPassword(email: string, token: string, password: string, passwordConfirmation: string) {
+    const response = await api.post("/reset-password", {
+      email,
+      token,
+      password,
+      password_confirmation: passwordConfirmation,
+    });
+    return response.data;
+  },
 };
