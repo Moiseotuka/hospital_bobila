@@ -1,7 +1,7 @@
 FROM php:8.4-cli-alpine
 
-RUN apk add --no-cache postgresql-dev unzip libxml2-dev freetype-dev libjpeg-turbo-dev libpng-dev libzip-dev icu-dev && \
-    docker-php-ext-install -j4 pdo_pgsql gd zip intl
+RUN apk add --no-cache postgresql-dev unzip && \
+    docker-php-ext-install -j4 pdo_pgsql
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
@@ -9,14 +9,12 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 
 WORKDIR /app
 COPY composer.json ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist 2>&1
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist
 
 COPY . .
-RUN cp .env.example.prod .env
-RUN php artisan key:generate --force
 
 RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views storage/framework/cache storage/logs && \
     chmod -R 777 bootstrap/cache storage
 
 EXPOSE 8000
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
