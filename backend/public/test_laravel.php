@@ -8,38 +8,41 @@ try {
 
     $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-    // Check PackageManifest
     $manifest = $app->make(\Illuminate\Foundation\PackageManifest::class);
-    $manifestPath = $manifest->manifestPath;
 
-    $results = [
-        'manifest_path' => $manifestPath,
-        'manifest_exists' => file_exists($manifestPath),
-        'vendor_path' => $manifest->vendorPath(),
-        'installed_json_exists' => file_exists(dirname($manifest->vendorPath()) . '/composer/installed.json'),
-    ];
+    $results = [];
 
-    // List all discovered providers
-    $allProviders = $manifest->providers();
+    // Get manifest path via reflection if needed
+    $ref = new ReflectionClass($manifest);
+    $mp = $ref->getProperty('manifestPath');
+    $mp->setAccessible(true);
+    $results['manifest_path'] = $mp->getValue($manifest);
+    $results['manifest_exists'] = file_exists($results['manifest_path']);
+
+    $vp = $ref->getProperty('vendorPath');
+    $vp->setAccessible(true);
+    $results['vendor_path'] = $vp->getValue($manifest);
+
+    // Get all providers
+    $pm = $ref->getMethod('providers');
+    $pm->setAccessible(true);
+    $allProviders = $pm->invoke($manifest);
     $results['discovered_providers_count'] = count($allProviders);
-    $results['discovered_providers'] = array_slice($allProviders, 0, 20);
+    $results['discovered_providers'] = array_slice($allProviders, 0, 30);
 
-    // Check if ViewServiceProvider is discovered
-    $hasViewProvider = false;
-    foreach ($allProviders as $p) {
-        if (str_contains($p, 'ViewServiceProvider')) {
-            $hasViewProvider = true;
-            $results['view_provider_found'] = $p;
-            break;
-        }
-    }
-    if (!$hasViewProvider) {
-        $results['view_provider_found'] = false;
-    }
+    // Check ViewServiceProvider
+    $found = array_filter($allProviders, fn($p) => str_contains($p, 'ViewService'));
+    $results['view_provider'] = !empty($found) ? reset($found) : 'NOT FOUND';
 
-    // List registered providers
-    $registeredProviders = array_keys($app->getLoadedProviders());
-    $results['registered_providers_count'] = count($registeredProviders);
+    // Check other View-related providers
+    $viewRelated = array_filter($allProviders, fn($p) => str_contains($p, 'View'));
+    $results['view_related'] = array_values($viewRelated);
+
+    // Check loaded providers
+    $results['loaded_providers_count'] = count($app->getLoadedProviders());
+    $loadedKeys = array_keys($app->getLoadedProviders());
+    $viewLoaded = array_filter($loadedKeys, fn($k) => str_contains($k, 'View'));
+    $results['loaded_view_providers'] = array_values($viewLoaded);
 
 } catch (Throwable $e) {
     http_response_code(200);
@@ -53,4 +56,4 @@ try {
 }
 
 http_response_code(200);
-echo json_encode(['success' => true, 'results' => $results], JSON_PRETTY_PRINT);
+echo json_encode(['success' => true, 'results' => $results], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
