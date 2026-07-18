@@ -9,7 +9,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 
 WORKDIR /app
 COPY composer.json ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist --no-audit 2>&1
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --prefer-dist 2>&1
 
 COPY . .
 RUN cp .env.example.prod .env 2>/dev/null || true
