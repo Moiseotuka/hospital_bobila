@@ -1,4 +1,8 @@
 FROM php:8.4-cli
-RUN echo "Build step 1 works"
-RUN echo "Build step 2 works"
-CMD php -v
+RUN docker-php-ext-install pdo_pgsql
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+WORKDIR /app
+COPY . .
+RUN cp .env.example.prod .env && composer install --no-dev --optimize-autoloader --no-interaction
+EXPOSE 8000
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
