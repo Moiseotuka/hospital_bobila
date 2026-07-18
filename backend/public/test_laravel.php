@@ -3,86 +3,62 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 header('Content-Type: application/json');
 
-try {
-    // Read installed.json directly
-    $installedJson = __DIR__ . '/../vendor/composer/installed.json';
-    $installed = json_decode(file_get_contents($installedJson), true);
+$results = [];
 
-    $results = [
-        'installed_json_exists' => file_exists($installedJson),
-        'installed_size' => file_exists($installedJson) ? filesize($installedJson) : 0,
-    ];
+try {
+    $installedJson = __DIR__ . '/../vendor/composer/installed.json';
+    $results['installed_json_exists'] = file_exists($installedJson);
+    $results['installed_size'] = file_exists($installedJson) ? filesize($installedJson) : 0;
 
     if (!file_exists($installedJson)) {
-        $results['error'] = 'installed.json not found';
-        echo json_encode(['success' => false, 'results' => $results], JSON_PRETTY_PRINT);
+        echo json_encode(['error' => 'installed.json not found']);
         exit;
     }
 
-    // Count packages with laravel providers
-    $packagesWithProviders = [];
-    $packagesWithAliases = [];
-    foreach ($installed as $package) {
-        if (isset($package['extra']['laravel']['providers'])) {
-            $packagesWithProviders[$package['name']] = $package['extra']['laravel']['providers'];
-        }
-        if (isset($package['extra']['laravel']['aliases'])) {
-            $packagesWithAliases[$package['name']] = array_keys($package['extra']['laravel']['aliases']);
+    $raw = file_get_contents($installedJson);
+    $installed = json_decode($raw, true);
+
+    // Composer 2.x wraps in {packages: [...], dev: bool}
+    $packages = $installed['packages'] ?? $installed;
+    $results['total_packages'] = count($packages);
+    $results['format'] = isset($installed['packages']) ? 'composer2' : 'composer1';
+
+    // Find packages with laravel providers
+    $allProviders = [];
+    foreach ($packages as $p) {
+        if (is_array($p) && isset($p['extra']['laravel']['providers'])) {
+            $allProviders = array_merge($allProviders, $p['extra']['laravel']['providers']);
         }
     }
+    $results['all_providers_from_installed'] = $allProviders;
+    $results['provider_count'] = count($allProviders);
 
-    $results['total_packages'] = count($installed);
-    $results['packages_with_providers'] = array_keys($packagesWithProviders);
-    $results['all_providers'] = array_values(array_merge(...array_values($packagesWithProviders)));
-
-    // Check specifically for illuminate packages
-    $illuminatePackages = array_filter($installed, fn($p) => str_starts_with($p['name'], 'illuminate/'));
-    $results['illuminate_count'] = count($illuminatePackages);
-    $illuminateProviders = [];
-    foreach ($illuminatePackages as $p) {
-        if (isset($p['extra']['laravel']['providers'])) {
-            $illuminateProviders[$p['name']] = $p['extra']['laravel']['providers'];
+    // Check illuminate packages
+    $illuminateWithProviders = [];
+    $illuminateTotal = 0;
+    foreach ($packages as $p) {
+        if (is_array($p) && isset($p['name']) && str_starts_with($p['name'], 'illuminate/')) {
+            $illuminateTotal++;
+            if (isset($p['extra']['laravel']['providers'])) {
+                $illuminateWithProviders[$p['name']] = $p['extra']['laravel']['providers'];
+            }
         }
     }
-    $results['illuminate_with_providers'] = $illuminateProviders;
+    $results['illuminate_total'] = $illuminateTotal;
+    $results['illuminate_with_providers'] = $illuminateWithProviders;
 
     // Read packages.php
     $manifestPath = __DIR__ . '/../bootstrap/cache/packages.php';
     $results['packages_php_exists'] = file_exists($manifestPath);
     if (file_exists($manifestPath)) {
+        $results['packages_php_content_length'] = filesize($manifestPath);
         $manifestContent = require $manifestPath;
         $results['packages_php_providers'] = $manifestContent['providers'] ?? [];
         $results['packages_php_aliases'] = $manifestContent['aliases'] ?? [];
-        $results['packages_php_how_many'] = count($manifestContent['providers'] ?? []);
-    }
-
-    // Also check if there's a packages.php generation mechanism
-    require __DIR__ . '/../vendor/autoload.php';
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
-    $manifest = $app->make(\Illuminate\Foundation\PackageManifest::class);
-
-    // Force manifest rebuild to see what would be generated
-    try {
-        $manifest->build();
-        $results['after_rebuild'] = file_exists($manifestPath) ? 'exists' : 'not exists';
-        if (file_exists($manifestPath)) {
-            $after = require $manifestPath;
-            $results['rebuild_providers_count'] = count($after['providers'] ?? []);
-            $results['rebuild_providers'] = $after['providers'] ?? [];
-        }
-    } catch (Throwable $e) {
-        $results['rebuild_error'] = $e->getMessage();
     }
 
 } catch (Throwable $e) {
-    http_response_code(200);
-    echo json_encode([
-        'success' => false,
-        'error' => get_class($e) . ': ' . $e->getMessage(),
-        'file' => $e->getFile() . ':' . $e->getLine(),
-    ]);
-    exit;
+    $results['error'] = get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
 }
 
-http_response_code(200);
-echo json_encode(['success' => true, 'results' => $results], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+echo json_encode(['results' => $results], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
