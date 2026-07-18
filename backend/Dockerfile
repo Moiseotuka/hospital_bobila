@@ -1,3 +1,14 @@
 FROM php:8.4-cli-alpine
-RUN apk add --no-cache postgresql-dev
-CMD php -v
+
+RUN apk add --no-cache postgresql-dev && docker-php-ext-install pdo_pgsql
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+COPY composer.json .env.example.prod ./
+RUN cp .env.example.prod .env && composer install --no-dev --optimize-autoloader --no-interaction
+
+COPY . .
+
+EXPOSE 8000
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
