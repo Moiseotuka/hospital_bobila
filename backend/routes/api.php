@@ -55,11 +55,8 @@ Route::get('/health', function () {
 Route::post('/setup', function () {
     try {
         $output = [];
-        $exitCode = \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $exitCode = \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true, '--seed' => true]);
         $output['migrate'] = ['exit' => $exitCode, 'output' => \Illuminate\Support\Facades\Artisan::output()];
-
-        $exitCode = \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-        $output['seed'] = ['exit' => $exitCode, 'output' => \Illuminate\Support\Facades\Artisan::output()];
 
         return response()->json(['success' => true, 'output' => $output]);
     } catch (\Throwable $e) {

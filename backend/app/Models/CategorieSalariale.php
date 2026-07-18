@@ -11,6 +11,8 @@ class CategorieSalariale extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'categories_salariales';
+
     protected $fillable = [
         'code',
         'nom',
