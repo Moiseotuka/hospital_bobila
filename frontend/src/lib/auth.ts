@@ -17,6 +17,7 @@ export function getToken(): string | null {
 export function removeToken(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
+    document.cookie = "auth_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT";
   }
 }
 
@@ -28,8 +29,13 @@ export function setUser(user: any): void {
 
 export function getUser(): any | null {
   if (typeof window !== "undefined") {
-    const user = localStorage.getItem(USER_KEY);
-    return user ? JSON.parse(user) : null;
+    try {
+      const user = localStorage.getItem(USER_KEY);
+      return user ? JSON.parse(user) : null;
+    } catch {
+      localStorage.removeItem(USER_KEY);
+      return null;
+    }
   }
   return null;
 }
