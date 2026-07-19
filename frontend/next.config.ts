@@ -6,24 +6,7 @@ const nextConfig: NextConfig = {
     domains: ["localhost", "hmckokolo.cd"],
   },
   async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/dashboard",
-        permanent: false,
-        has: [
-          {
-            type: "cookie",
-            key: "auth_token",
-          },
-        ],
-      },
-      {
-        source: "/",
-        destination: "/login",
-        permanent: false,
-      },
-    ];
+    return [];
   },
 };
 
