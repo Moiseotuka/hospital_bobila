@@ -4,10 +4,10 @@ import { setToken, setUser, removeToken, removeUser } from "@/lib/auth";
 export const authService = {
   async login(email: string, password: string) {
     const response = await api.post("/login", { email, password });
-    const { token, user } = response.data;
-    setToken(token);
-    setUser(user);
-    return response.data;
+    const payload = response.data.data;
+    setToken(payload.token);
+    setUser(payload.user);
+    return payload;
   },
 
   async logout() {
@@ -21,12 +21,12 @@ export const authService = {
 
   async getMe() {
     const response = await api.get("/me");
-    return response.data;
+    return response.data.data;
   },
 
   async updateProfile(data: any) {
     const response = await api.put("/profile", data);
-    return response.data;
+    return response.data.data;
   },
 
   async forgotPassword(email: string) {
