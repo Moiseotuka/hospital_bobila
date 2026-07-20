@@ -46,9 +46,17 @@ class PaieController extends Controller
         $validated = $request->validate([
             'mois' => 'required|integer|min:1|max:12',
             'annee' => 'required|integer|min:2020|max:2100',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'date_debut' => 'nullable|date',
+            'date_fin' => 'nullable|date|after_or_equal:date_debut',
         ]);
+
+        if (empty($validated['date_debut'])) {
+            $validated['date_debut'] = now()->setYear((int) $validated['annee'])->setMonth((int) $validated['mois'])->startOfMonth()->format('Y-m-d');
+        }
+
+        if (empty($validated['date_fin'])) {
+            $validated['date_fin'] = now()->setYear((int) $validated['annee'])->setMonth((int) $validated['mois'])->endOfMonth()->format('Y-m-d');
+        }
 
         $exists = PeriodePaie::where('mois', $validated['mois'])
             ->where('annee', $validated['annee'])
@@ -128,6 +136,43 @@ class PaieController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse('Erreur lors de la validation: ' . $e->getMessage(), null, 500);
         }
+    }
+
+    public function update($id, Request $request): JsonResponse
+    {
+        $periode = PeriodePaie::findOrFail($id);
+
+        if ($periode->statut !== StatutPeriodePaieEnum::EN_ATTENTE->value) {
+            return $this->errorResponse('Seules les périodes en attente peuvent être modifiées.', null, 409);
+        }
+
+        $validated = $request->validate([
+            'mois' => 'sometimes|integer|min:1|max:12',
+            'annee' => 'sometimes|integer|min:2020|max:2100',
+            'date_debut' => 'sometimes|date',
+            'date_fin' => 'sometimes|date|after_or_equal:date_debut',
+        ]);
+
+        $periode->update($validated);
+
+        $this->auditService->logModification('Paie', 'Modification de la période ' . $periode->mois . '/' . $periode->annee, $periode, [], $validated);
+
+        return $this->successResponse(new PeriodePaieResource($periode), 'Période modifiée avec succès.');
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        $periode = PeriodePaie::findOrFail($id);
+
+        if ($periode->statut !== StatutPeriodePaieEnum::EN_ATTENTE->value) {
+            return $this->errorResponse('Seules les périodes en attente peuvent être supprimées.', null, 409);
+        }
+
+        $periode->delete();
+
+        $this->auditService->logSuppression('Paie', 'Suppression de la période ' . $periode->mois . '/' . $periode->annee, $periode, $periode->toArray());
+
+        return $this->successResponse(null, 'Période supprimée avec succès.');
     }
 
     public function lock($id): JsonResponse

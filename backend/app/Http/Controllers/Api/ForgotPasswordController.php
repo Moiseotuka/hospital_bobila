@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
-use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 
 class ForgotPasswordController
 {
@@ -20,17 +18,20 @@ class ForgotPasswordController
         );
 
         if ($status === Password::RESET_LINK_SENT) {
-            $token = null;
-            $user = User::where('email', $request->email)->first();
-            if ($user) {
-                $token = app(PasswordBroker::class)->getRepository()->create($user);
-            }
-
-            return response()->json([
+            $response = [
                 'success' => true,
                 'message' => __($status),
-                'token' => $token,
-            ]);
+            ];
+
+            if (!app()->environment('production')) {
+                $user = User::where('email', $request->email)->first();
+                if ($user) {
+                    $response['token'] = app(\Illuminate\Auth\Passwords\PasswordBroker::class)
+                        ->getRepository()->create($user);
+                }
+            }
+
+            return response()->json($response);
         }
 
         return response()->json([

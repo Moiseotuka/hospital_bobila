@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CategorieSalarialeController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DepartementController;
 use App\Http\Controllers\Api\FonctionController;
+use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\PaieController;
 use App\Http\Controllers\Api\PaiementController;
@@ -66,18 +67,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
-    Route::get('/dashboard/evolution', [DashboardController::class, 'evolutionMensuelle']);
-    Route::get('/dashboard/repartition-grade', [DashboardController::class, 'repartitionGrade']);
-    Route::get('/dashboard/repartition-departement', [DashboardController::class, 'repartitionDepartement']);
+    Route::get('/dashboard/evolution-mensuelle', [DashboardController::class, 'evolutionMensuelle']);
+    Route::get('/dashboard/repartition-grades', [DashboardController::class, 'repartitionGrade']);
+    Route::get('/dashboard/repartition-departements', [DashboardController::class, 'repartitionDepartement']);
     Route::get('/dashboard/derniers-paiements', [DashboardController::class, 'derniersPaiements']);
     Route::get('/dashboard/alertes', [DashboardController::class, 'alertes']);
 
     // Agents
-    Route::get('agents-stats', [AgentController::class, 'stats']);
+    Route::get('/agents/stats', [AgentController::class, 'stats']);
     Route::apiResource('agents', AgentController::class);
-    Route::post('agents/{id}/restore', [AgentController::class, 'restore']);
-    Route::get('agents/{id}/export-pdf', [AgentController::class, 'exportPDF']);
-    Route::get('agents/{id}/export-excel', [AgentController::class, 'exportExcel']);
+    Route::post('/agents/{id}/restore', [AgentController::class, 'restore']);
+    Route::get('/agents/{id}/export-pdf', [AgentController::class, 'exportPDF']);
+    Route::get('/agents/{id}/export-excel', [AgentController::class, 'exportExcel']);
 
     // Reference resources
     Route::apiResource('grades', GradeController::class);
@@ -89,56 +90,62 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('retenues', RetenueController::class);
 
     // Prime & Retenue calculations
-    Route::get('primes/calculate/{agent}', [PrimeController::class, 'calculatePrime']);
-    Route::get('retenues/calculate/{agent}/{salaireBrut}', [RetenueController::class, 'calculateRetenue']);
+    Route::get('/primes/calculate/{agent}', [PrimeController::class, 'calculatePrime']);
+    Route::get('/retenues/calculate/{agent}/{salaireBrut}', [RetenueController::class, 'calculateRetenue']);
 
-    // Paie
-    Route::get('paies', [PaieController::class, 'index']);
-    Route::post('paies', [PaieController::class, 'store']);
-    Route::get('paies/{id}', [PaieController::class, 'show']);
-    Route::post('paies/{id}/generate', [PaieController::class, 'generate']);
-    Route::post('paies/{id}/validate', [PaieController::class, 'validate']);
-    Route::post('paies/{id}/lock', [PaieController::class, 'lock']);
-    Route::get('paies/{id}/bulletins', [PaieController::class, 'getBulletins']);
-    Route::get('paies/{id}/stats', [PaieController::class, 'getStats']);
+    // Periodes de paie
+    Route::get('/periodes-paie', [PaieController::class, 'index']);
+    Route::post('/periodes-paie', [PaieController::class, 'store']);
+    Route::get('/periodes-paie/{id}', [PaieController::class, 'show']);
+    Route::put('/periodes-paie/{id}', [PaieController::class, 'update']);
+    Route::delete('/periodes-paie/{id}', [PaieController::class, 'destroy']);
+    Route::post('/periodes-paie/{id}/generer', [PaieController::class, 'generate']);
+    Route::post('/periodes-paie/{id}/valider', [PaieController::class, 'validate']);
+    Route::post('/periodes-paie/{id}/verrouiller', [PaieController::class, 'lock']);
+    Route::get('/periodes-paie/{id}/bulletins', [PaieController::class, 'getBulletins']);
+    Route::get('/periodes-paie/{id}/stats', [PaieController::class, 'getStats']);
 
     // Paiements
-    Route::get('paiements', [PaiementController::class, 'index']);
-    Route::post('paiements', [PaiementController::class, 'store']);
-    Route::post('paiements/collective', [PaiementController::class, 'storeCollective']);
-    Route::get('paiements/{id}', [PaiementController::class, 'show']);
-    Route::put('paiements/{id}', [PaiementController::class, 'update']);
-    Route::delete('paiements/{id}', [PaiementController::class, 'destroy']);
+    Route::get('/paiements/periode/{periodeId}', [PaiementController::class, 'index']);
+    Route::post('/paiements/collective', [PaiementController::class, 'storeCollective']);
+    Route::post('/paiements/{id}/annuler', [PaiementController::class, 'destroy']);
+    Route::apiResource('paiements', PaiementController::class)->except(['index', 'store']);
+    Route::get('/paiements', [PaiementController::class, 'index']);
+    Route::post('/paiements', [PaiementController::class, 'store']);
 
     // Bulletins
-    Route::get('bulletins', [BulletinController::class, 'index']);
-    Route::get('bulletins/{id}', [BulletinController::class, 'show']);
-    Route::get('bulletins/{id}/download-pdf', [BulletinController::class, 'downloadPDF']);
-    Route::get('bulletins/{id}/print', [BulletinController::class, 'print']);
-    Route::post('bulletins/{id}/send-email', [BulletinController::class, 'sendByEmail']);
+    Route::get('/bulletins/agent/{agentId}', [BulletinController::class, 'index']);
+    Route::get('/bulletins/periode/{periodeId}', [BulletinController::class, 'index']);
+    Route::get('/bulletins/{id}/download-pdf', [BulletinController::class, 'downloadPDF']);
+    Route::get('/bulletins/{id}/print', [BulletinController::class, 'print']);
+    Route::get('/bulletins/{id}/pdf', [BulletinController::class, 'downloadPDF']);
+    Route::post('/bulletins/{id}/send-email', [BulletinController::class, 'sendByEmail']);
+    Route::apiResource('bulletins', BulletinController::class)->except(['store', 'update', 'destroy']);
 
     // Rapports
-    Route::get('rapports/mensuel/{mois}/{annee}', [RapportController::class, 'mensuel']);
-    Route::get('rapports/annuel/{annee}', [RapportController::class, 'annuel']);
-    Route::get('rapports/masse-salariale', [RapportController::class, 'masseSalariale']);
-    Route::get('rapports/agents-impayes/{periodeId}', [RapportController::class, 'agentsImpayes']);
-    Route::get('rapports/retenues/{periodeId}', [RapportController::class, 'retenues']);
-    Route::get('rapports/primes/{periodeId}', [RapportController::class, 'primes']);
-    Route::get('rapports/export/{type}', [RapportController::class, 'exportPDF']);
-    Route::get('rapports/export-excel/{type}', [RapportController::class, 'exportExcel']);
+    Route::get('/rapports/mensuel/{mois}/{annee}', [RapportController::class, 'mensuel']);
+    Route::get('/rapports/annuel/{annee}', [RapportController::class, 'annuel']);
+    Route::get('/rapports/masse-salariale', [RapportController::class, 'masseSalariale']);
+    Route::get('/rapports/agents-impayes/{periodeId}', [RapportController::class, 'agentsImpayes']);
+    Route::get('/rapports/retenues/{periodeId}', [RapportController::class, 'retenues']);
+    Route::get('/rapports/primes/{periodeId}', [RapportController::class, 'primes']);
+    Route::get('/rapports/export/{type}', [RapportController::class, 'exportPDF']);
+    Route::get('/rapports/export-excel/{type}', [RapportController::class, 'exportExcel']);
 
     // Audit
-    Route::get('audit-logs', [AuditController::class, 'index']);
-    Route::get('audit-logs/{id}', [AuditController::class, 'show']);
-    Route::get('audit-logs/export/excel', [AuditController::class, 'exportExcel']);
+    Route::get('/audit-logs', [AuditController::class, 'index']);
+    Route::get('/audit-logs/{id}', [AuditController::class, 'show']);
+    Route::get('/audit-logs/export/excel', [AuditController::class, 'exportExcel']);
 
     // Parametres
-    Route::get('parametres', [ParametreController::class, 'index']);
-    Route::get('parametres/{key}', [ParametreController::class, 'show']);
-    Route::put('parametres/{key}', [ParametreController::class, 'update']);
-    Route::post('parametres/logo', [ParametreController::class, 'updateLogo']);
-    Route::post('parametres/signature', [ParametreController::class, 'updateSignature']);
-    Route::post('parametres/cachet', [ParametreController::class, 'updateCachet']);
+    Route::get('/parametres', [ParametreController::class, 'index']);
+    Route::post('/parametres/logo', [ParametreController::class, 'updateLogo']);
+    Route::post('/parametres/signature', [ParametreController::class, 'updateSignature']);
+    Route::post('/parametres/cachet', [ParametreController::class, 'updateCachet']);
+    Route::get('/parametres/{group}', [ParametreController::class, 'showGroup']);
+    Route::put('/parametres/{group}', [ParametreController::class, 'updateGroup']);
+    Route::post('/parametres', [ParametreController::class, 'store']);
+    Route::delete('/parametres/{group}', [ParametreController::class, 'destroy']);
 
     // Users (admin only)
     Route::middleware('role:administrateur')->group(function () {

@@ -1,33 +1,19 @@
 import api from "@/lib/api";
+import type { ApiResponse } from "@/types";
 
 export const parametreService = {
-  async getParametres(params?: any) {
-    const response = await api.get("/parametres", { params });
+  async getParametres() {
+    const response = await api.get<ApiResponse<Record<string, unknown[]>>>("/parametres");
     return response.data;
   },
 
-  async getParametre(id: number) {
-    const response = await api.get(`/parametres/${id}`);
+  async getParametreByKey(group: string) {
+    const response = await api.get<ApiResponse<Record<string, unknown>>>(`/parametres/${group}`);
     return response.data;
   },
 
-  async getParametreByKey(key: string) {
-    const response = await api.get(`/parametres/${key}`);
-    return response.data;
-  },
-
-  async createParametre(data: any) {
-    const response = await api.post("/parametres", data);
-    return response.data;
-  },
-
-  async updateParametre(id: number, data: any) {
-    const response = await api.put(`/parametres/${id}`, data);
-    return response.data;
-  },
-
-  async deleteParametre(id: number) {
-    const response = await api.delete(`/parametres/${id}`);
+  async updateParametre(group: string, data: Record<string, unknown>) {
+    const response = await api.put<ApiResponse<Record<string, unknown>>>(`/parametres/${group}`, data);
     return response.data;
   },
 };

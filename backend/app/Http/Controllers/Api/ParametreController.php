@@ -13,9 +13,19 @@ class ParametreController extends Controller
 {
     protected AuditService $auditService;
 
+    private const GROUP_NAMES = [1 => 'hopital', 2 => 'paie', 3 => 'taxes', 4 => 'general'];
+
     public function __construct(AuditService $auditService)
     {
         $this->auditService = $auditService;
+    }
+
+    private function resolveGroup($group): string
+    {
+        if (is_numeric($group) && isset(self::GROUP_NAMES[(int) $group])) {
+            return self::GROUP_NAMES[(int) $group];
+        }
+        return $group;
     }
 
     public function index(): JsonResponse
@@ -25,50 +35,85 @@ class ParametreController extends Controller
         return $this->successResponse($settings);
     }
 
-    public function show($key): JsonResponse
+    public function showGroup($group): JsonResponse
     {
-        $setting = HospitalSetting::where('key', $key)->first();
+        $group = $this->resolveGroup($group);
+        $settings = HospitalSetting::where('group', $group)->get();
 
-        if (!$setting) {
-            return $this->errorResponse('Paramètre non trouvé.', null, 404);
+        if ($settings->isEmpty()) {
+            return $this->errorResponse('Groupe de paramètres non trouvé.', null, 404);
         }
 
-        return $this->successResponse([
-            'key' => $setting->key,
-            'value' => $setting->value,
-            'type' => $setting->type,
-            'group' => $setting->group,
-        ]);
+        $data = [];
+        foreach ($settings as $setting) {
+            $data[$setting->key] = $setting->value;
+        }
+
+        return $this->successResponse($data);
     }
 
-    public function update(Request $request, $key): JsonResponse
+    public function updateGroup(Request $request, $group): JsonResponse
+    {
+        $request->validate([
+            '*' => 'required',
+        ]);
+
+        $group = $this->resolveGroup($group);
+
+        try {
+            $updated = [];
+            foreach ($request->all() as $key => $value) {
+                $setting = HospitalSetting::updateOrCreate(
+                    ['key' => $key, 'group' => $group],
+                    ['value' => $value, 'type' => 'text']
+                );
+                $updated[$key] = $setting->fresh()->value;
+            }
+
+            $this->auditService->logModification('Parametre', 'Mise à jour du groupe ' . $group, null, [], $request->all());
+
+            return $this->successResponse($updated, 'Paramètres mis à jour avec succès.');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Erreur lors de la mise à jour des paramètres: ' . $e->getMessage(), null, 500);
+        }
+    }
+
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'key' => 'required|string|max:100|unique:hospital_settings,key',
             'value' => 'required',
             'type' => 'sometimes|string|in:text,boolean,integer,float,json',
             'group' => 'sometimes|string|max:50',
         ]);
 
         try {
-            $setting = HospitalSetting::where('key', $key)->first();
+            $setting = HospitalSetting::create($validated);
 
-            if (!$setting) {
-                return $this->errorResponse('Paramètre non trouvé.', null, 404);
-            }
-
-            $ancienneValeur = $setting->value;
-            $setting->update($validated);
-
-            $this->auditService->logModification('Parametre', 'Modification du paramètre ' . $key, $setting, ['key' => $key, 'value' => $ancienneValeur], ['key' => $key, 'value' => $validated['value']]);
+            $this->auditService->logCreation('Parametre', 'Création du paramètre ' . $validated['key'], $setting, $validated);
 
             return $this->successResponse([
                 'key' => $setting->key,
-                'value' => $setting->fresh()->value,
+                'value' => $setting->value,
                 'type' => $setting->type,
                 'group' => $setting->group,
-            ], 'Paramètre mis à jour avec succès.');
+            ], 'Paramètre créé avec succès.', 201);
         } catch (\Exception $e) {
-            return $this->errorResponse('Erreur lors de la mise à jour du paramètre: ' . $e->getMessage(), null, 500);
+            return $this->errorResponse('Erreur lors de la création du paramètre: ' . $e->getMessage(), null, 500);
+        }
+    }
+
+    public function destroy($key): JsonResponse
+    {
+        try {
+            $setting = HospitalSetting::where('key', $key)->firstOrFail();
+            $setting->delete();
+
+            $this->auditService->logSuppression('Parametre', 'Suppression du paramètre ' . $key, $setting, $setting->toArray());
+
+            return $this->successResponse(null, 'Paramètre supprimé avec succès.');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Erreur lors de la suppression du paramètre: ' . $e->getMessage(), null, 500);
         }
     }
 

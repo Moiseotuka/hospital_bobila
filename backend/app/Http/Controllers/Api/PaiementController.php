@@ -34,6 +34,10 @@ class PaiementController extends Controller
             $query->where('statut', $request->statut);
         }
 
+        if ($request->mode_paiement) {
+            $query->where('mode_paiement', $request->mode_paiement);
+        }
+
         if ($request->agent_id) {
             $query->where('agent_id', $request->agent_id);
         }

@@ -1,7 +1,8 @@
-FROM php:8.4-cli-alpine
+FROM php:8.4-fpm-alpine
 
-RUN apk add --no-cache postgresql-dev unzip && \
-    docker-php-ext-install -j4 pdo_pgsql
+RUN apk add --no-cache postgresql-dev unzip nginx supervisor && \
+    docker-php-ext-install -j4 pdo_pgsql && \
+    docker-php-ext-enable pdo_pgsql
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
@@ -16,7 +17,10 @@ COPY . .
 RUN mkdir -p bootstrap/cache storage/framework/sessions storage/framework/views storage/framework/cache storage/logs && \
     chmod -R 777 bootstrap/cache storage
 
-EXPOSE 10000
-ENV PORT=10000
-ENV APP_DEBUG=false
-CMD php -S 0.0.0.0:${PORT:-10000} -t public public/index.php
+COPY nginx.conf /etc/nginx/http.d/default.conf
+
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+EXPOSE 8080
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
