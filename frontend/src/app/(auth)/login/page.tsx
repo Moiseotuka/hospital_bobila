@@ -75,7 +75,7 @@ export default function LoginPage() {
             <div>
               <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
               <p className="mt-1 text-sm text-muted-foreground">
-                Hôpital Militaire Camp Kokolo
+                Hôpital Militaire Central Camp Kokolo
               </p>
             </div>
           </CardHeader>

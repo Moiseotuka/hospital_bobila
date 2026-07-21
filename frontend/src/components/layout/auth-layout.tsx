@@ -120,7 +120,7 @@ export function AuthLayout({ children, className }: AuthLayoutProps) {
           <div className="lg:hidden flex flex-col items-center mb-8">
             <Hospital className="h-12 w-12 text-primary mb-3" />
             <h1 className="text-xl font-bold text-center">
-              Hôpital Militaire Camp Kokolo
+              Hôpital Militaire Central Camp Kokolo
             </h1>
             <p className="text-sm text-muted-foreground">
               Système de Gestion de Paie

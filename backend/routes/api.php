@@ -35,7 +35,7 @@ Route::get('/health', function () {
 
         return response()->json([
             'success' => true,
-            'message' => 'API Hôpital Militaire Camp Kokolo - Opérationnelle',
+            'message' => 'API Hôpital Militaire Central Camp Kokolo - Opérationnelle',
             'timestamp' => now()->toIso8601String(),
             'debug' => [
                 'db_connected' => $dbOk,

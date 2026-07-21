@@ -121,7 +121,7 @@ export function Sidebar({ className, onItemClick }: SidebarProps) {
                 className="overflow-hidden"
               >
                 <h1 className="text-sm font-bold leading-tight text-sidebar-foreground">
-                  Hôpital Militaire
+                  Hôpital Militaire Central
                 </h1>
                 <p className="text-[10px] text-sidebar-foreground/50">
                   Camp Kokolo

@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Gestion Paie - Hôpital Militaire Camp Kokolo",
+  title: "Gestion Paie - Hôpital Militaire Central Camp Kokolo",
   description: "Système de gestion de paie",
 };
 
