@@ -4,10 +4,13 @@ services:
     env: php
     buildCommand: |
       composer install --no-dev --optimize-autoloader
+      php artisan key:generate --force
       php artisan optimize
       php artisan storage:link
     startCommand: |
       php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+    releaseCommand: |
+      php artisan migrate --seed --force
     healthCheckPath: /api/health
     envVars:
       - key: APP_ENV

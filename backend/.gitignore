@@ -9,3 +9,4 @@
 /bootstrap/cache/*
 .DS_Store
 Thumbs.db
+/database/database.sqlite

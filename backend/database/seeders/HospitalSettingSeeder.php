@@ -18,8 +18,6 @@ class HospitalSettingSeeder extends Seeder
             ['key' => 'devise_symbole', 'value' => 'FC', 'type' => 'text', 'group' => 'hopital'],
             ['key' => 'taux_change', 'value' => '2500', 'type' => 'float', 'group' => 'hopital'],
             ['key' => 'jour_traitement', 'value' => '25', 'type' => 'integer', 'group' => 'paie'],
-            ['key' => 'devise', 'value' => 'FC', 'type' => 'text', 'group' => 'paie'],
-            ['key' => 'taux_change', 'value' => '2500', 'type' => 'float', 'group' => 'paie'],
             ['key' => 'taux_impot', 'value' => '15', 'type' => 'float', 'group' => 'taxes'],
             ['key' => 'taux_cnss', 'value' => '5', 'type' => 'float', 'group' => 'taxes'],
             ['key' => 'taux_cnss_employeur', 'value' => '7', 'type' => 'float', 'group' => 'taxes'],

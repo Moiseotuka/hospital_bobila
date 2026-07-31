@@ -16,8 +16,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('model_type')->nullable();
             $table->unsignedBigInteger('model_id')->nullable();
-            $table->jsonb('anciennes_valeurs')->nullable();
-            $table->jsonb('nouvelles_valeurs')->nullable();
+            $table->json('anciennes_valeurs')->nullable();
+            $table->json('nouvelles_valeurs')->nullable();
             $table->string('ip_address')->nullable();
             $table->text('user_agent')->nullable();
             $table->timestamp('created_at')->index();

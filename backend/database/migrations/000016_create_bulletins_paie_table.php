@@ -24,8 +24,8 @@ return new class extends Migration
             $table->decimal('salaire_brut', 15, 2);
             $table->decimal('salaire_net', 15, 2);
             $table->decimal('net_a_payer', 15, 2);
-            $table->jsonb('primes_detail')->nullable();
-            $table->jsonb('retenues_detail')->nullable();
+            $table->json('primes_detail')->nullable();
+            $table->json('retenues_detail')->nullable();
             $table->dateTime('date_generation');
             $table->boolean('est_valide')->default(false);
             $table->boolean('est_verrouille')->default(false);
