@@ -1,17 +1,10 @@
 FROM php:8.4-fpm-alpine
 
-RUN apk add --no-cache \
-        postgresql-dev \
-        nginx \
-        supervisor \
-        libpng-dev \
-        libjpeg-turbo-dev \
-        freetype-dev \
-        libzip-dev \
-        icu-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j4 pdo_pgsql pgsql gd zip intl bcmath exif pcntl sockets \
-    && docker-php-ext-enable pdo_pgsql pgsql gd zip intl bcmath exif pcntl sockets
+RUN apk add --no-cache nginx supervisor curl \
+    && curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
+       -o /usr/local/bin/install-php-extensions \
+    && chmod +x /usr/local/bin/install-php-extensions \
+    && install-php-extensions pdo_pgsql pgsql gd zip intl
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
