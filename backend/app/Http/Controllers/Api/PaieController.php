@@ -111,7 +111,7 @@ class PaieController extends Controller
         }
     }
 
-    public function validate($id): JsonResponse
+    public function valider($id): JsonResponse
     {
         try {
             $periode = PeriodePaie::findOrFail($id);
